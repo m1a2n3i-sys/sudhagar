@@ -1,0 +1,81 @@
+{% extends 'posts/base.html' %}
+{% block title %}PixelGram - Home{% endblock %}
+
+{% block content %}
+
+<form method="get" class="search-bar mb-4">
+    <div class="input-group">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0"
+               placeholder="Search posts by title or caption...">
+        {% if query %}
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">Clear</a>
+        {% endif %}
+        <button class="btn btn-gradient" type="submit">Search</button>
+    </div>
+</form>
+
+{% if query %}
+    <p class="text-muted">Showing results for "<strong>{{ query }}</strong>" ({{ page_obj.paginator.count }} found)</p>
+{% endif %}
+
+{% if page_obj.object_list %}
+<div class="row g-4">
+    {% for post in page_obj %}
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card post-card h-100">
+            <a href="{% url 'post_detail' post.pk %}">
+                <img src="{{ post.image.url }}" class="card-img-top post-img" alt="{{ post.title }}">
+            </a>
+            <div class="card-body">
+                <h5 class="card-title">{{ post.title }}</h5>
+                <p class="card-text post-caption">{{ post.caption|truncatewords:20 }}</p>
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-person-circle"></i> {{ post.author.username }}
+                    &middot; <i class="bi bi-clock"></i> {{ post.created_at|date:"d M Y, h:i A" }}
+                </p>
+            </div>
+            {% if user == post.author %}
+            <div class="card-footer bg-white border-top-0 d-flex gap-2">
+                <a href="{% url 'post_edit' post.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a href="{% url 'post_delete' post.pk %}" class="btn btn-sm btn-outline-danger flex-fill">
+                    <i class="bi bi-trash"></i> Delete
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-5" aria-label="Post pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-camera display-1 text-muted"></i>
+    <h4 class="mt-3">No posts found</h4>
+    <p class="text-muted">
+        {% if query %}Try a different search term.{% else %}Be the first to share something!{% endif %}
+    </p>
+    {% if user.is_authenticated and not query %}
+        <a href="{% url 'post_create' %}" class="btn btn-gradient">Create your first post</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
