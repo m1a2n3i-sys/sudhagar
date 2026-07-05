@@ -12,7 +12,7 @@ from .forms import PostForm, RegisterForm
 
 
 # ---------------------------------------------------------------------
-# 1. REGISTRATION
+# 1. REGISTRATION         
 # ---------------------------------------------------------------------
 def register_view(request):
     if request.user.is_authenticated:
